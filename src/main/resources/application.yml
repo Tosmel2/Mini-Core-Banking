@@ -1,6 +1,16 @@
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   application:
     name: mini-core-banking
+
+#Default to dev profile (local development)
+---
+spring:
+  config:
+    activate:
+      on-profile:dev
+
 
   datasource:
     url: jdbc:postgresql://localhost:5432/banking_db

@@ -1,8 +1,10 @@
 package com.banking.service;
 
 import com.banking.dto.*;
+import com.banking.entity.Account;
 import com.banking.entity.Loan;
 import com.banking.entity.User;
+import com.banking.exception.BadRequestException;
 import com.banking.exception.ResourceNotFoundException;
 import com.banking.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.banking.entity.Transaction;
+
+import java.time.format.DateTimeFormatter;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +103,70 @@ public class AdminService {
 
         Loan updatedLoan = loanRepository.save(loan);
         return mapLoanToDto(updatedLoan);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LOAN_OFFICER')")
+    public LoanDto disburseLoan(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResourceNotFoundException("Loan not found with id: " + loanId));
+
+        // Validate loan can be disbursed
+        if (loan.getStatus() != Loan.LoanStatus.APPROVED) {
+            throw new BadRequestException("Only approved loans can be disbursed. Current status: " + loan.getStatus());
+        }
+
+        // Get the linked account
+        Account account = loan.getAccount();
+        if (account == null) {
+            throw new BadRequestException("Loan has no linked account for disbursement");
+        }
+
+        if (account.getStatus() != Account.AccountStatus.ACTIVE) {
+            throw new BadRequestException("Account is not active. Cannot disburse loan.");
+        }
+
+        // Credit the loan amount to the account
+        account.credit(loan.getPrincipalAmount());
+        accountRepository.save(account);
+
+        // Update loan status to ACTIVE
+        loan.setStatus(Loan.LoanStatus.ACTIVE);
+        loan.setDisbursementDate(LocalDateTime.now());
+        loan.setOutstandingBalance(loan.getPrincipalAmount());
+
+        // Calculate and set maturity date
+        LocalDate maturityDate = LocalDate.now().plusMonths(loan.getTermMonths());
+        loan.setMaturityDate(maturityDate);
+
+        Loan updatedLoan = loanRepository.save(loan);
+
+        // Optional: Create a transaction record for the disbursement
+        createDisbursementTransaction(loan, account);
+
+        return mapLoanToDto(updatedLoan);
+    }
+
+    // Helper method to create transaction record for disbursement
+    private void createDisbursementTransaction(Loan loan, Account account) {
+        Transaction transaction = Transaction.builder()
+                .transactionRef(generateTransactionRef())
+                .destinationAccount(account)
+                .transactionType(Transaction.TransactionType.DEPOSIT)
+                .amount(loan.getPrincipalAmount())
+                .currency(account.getCurrency())
+                .description("Loan disbursement - " + loan.getLoanNumber())
+                .status(Transaction.TransactionStatus.COMPLETED)
+                .build();
+
+        transactionRepository.save(transaction);
+    }
+
+    // Helper method to generate transaction reference
+    private String generateTransactionRef() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        int randomNum = 100 + new java.security.SecureRandom().nextInt(900);
+        return "TXN" + timestamp + randomNum;
     }
 
     @Transactional

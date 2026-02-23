@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: mini-core-banking
+
+  datasource:
+    url: ${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Use 'validate' in production
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+    include-exception: false
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000
+  refresh-expiration: 604800000
+
+# Logging
+logging:
+  level:
+    com.banking: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+
+# CORS - Update with your frontend URL
+cors:
+  allowed-origins: ${FRONTEND_URL:https://monivoza.vercel.app}
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true

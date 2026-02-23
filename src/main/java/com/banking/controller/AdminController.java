@@ -74,6 +74,22 @@ public class AdminController {
         return ResponseEntity.ok(loan);
     }
 
+    // @PutMapping("/loans/{loanId}/disburse")
+    // @Operation(summary = "Disburse an approved loan (activate and credit account)")
+    // public ResponseEntity<LoanDto> disburseLoan(@PathVariable Long loanId) {
+    //     LoanDto loan = adminService.disburseLoan(loanId);
+    //     return ResponseEntity.ok(loan);
+    // }
+
+    @PutMapping("/loans/{loanId}/disburse")
+    @Operation(summary = "Disburse an approved loan")
+    public ResponseEntity<LoanDto> disburseLoan(
+            @PathVariable Long loanId,
+            @Valid @RequestBody(required = false) LoanDisbursementRequest request) {
+        LoanDto loan = adminService.disburseLoan(loanId);
+        return ResponseEntity.ok(loan);
+    }
+
     @GetMapping("/dashboard/stats")
     @Operation(summary = "Get dashboard statistics")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
