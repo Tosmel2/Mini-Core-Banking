@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Mini Core Banking API",
+                title = "monivoza Banking API",
                 version = "1.0.0",
-                description = "Mini Core Banking Application with Loan Management REST API",
+                description = "monivoza Banking Application with Loan Management REST API",
                 contact = @Contact(
                         name = "Banking Support",
-                        email = "support@banking.com"
+                        email = "support@monivoza.com"
                 ),
                 license = @License(
                         name = "MIT License",
@@ -27,12 +27,13 @@ import org.springframework.context.annotation.Configuration;
         ),
         servers = {
                 @Server(
-                        description = "Local Development Server",
-                        url = "http://localhost:8080/api/v1"
+                        description = "Production Server",
+                        url = "https://monivoza.onrender.com/api/v1"
                 ),
                 @Server(
-                        description = "Production Server",
-                        url = "https://api.banking.com/api/v1"
+                        
+                        description = "Local Development Server",
+                        url = "http://localhost:8080/api/v1"
                 )
         }
 )
