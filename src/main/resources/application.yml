@@ -4,50 +4,6 @@ spring:
   application:
     name: mini-core-banking
 
-#Default to dev profile (local development)
----
-spring:
-  config:
-    activate:
-      on-profile:dev
-
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/banking_db
-    username: postgres
-    password: '@Bodmas007'
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-
-  jpa:
-    hibernate:
-      ddl-auto: update  # Use 'validate' in production
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
-    open-in-view: false
-
-  security:
-    filter:
-      order: 5
-
-server:
-  port: 8081
-  servlet:
-    context-path: /api/v1
-#  error:
-#    include-message: always
-#    include-binding-errors: always
-
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:your-very-secure-secret-key-change-in-production-minimum-256-bits}
