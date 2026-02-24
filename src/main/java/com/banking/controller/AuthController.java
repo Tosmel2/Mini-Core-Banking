@@ -14,6 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = {
+    "http://localhost:3000",
+    "http://localhost:5173", 
+    "https://monivoza.vercel.app"  // Your Vercel domain
+})
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Authentication management APIs")
