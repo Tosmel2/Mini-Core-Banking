@@ -13,9 +13,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "monivoza Banking API",
+                title = "Monivoza Banking API",
                 version = "1.0.0",
-                description = "monivoza Banking Application with Loan Management REST API",
+                description = "Monivoza Banking Application with Loan Management REST API",
                 contact = @Contact(
                         name = "Banking Support",
                         email = "support@monivoza.com"
