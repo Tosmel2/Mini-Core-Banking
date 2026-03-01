@@ -41,7 +41,7 @@ logging:
 
 # CORS - Update with your frontend URL
 cors:
-  allowed-origins: ${FRONTEND_URL:https://monivoza.vercel.app, http://localhost:5173, http://localhost:3000, https://monivoza.adnegstech.com}
+  allowed-origins: ${FRONTEND_URL:https://monivoza.vercel.app,http://localhost:5173,http://localhost:3000,https://monivoza.adnegstech.com}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true
