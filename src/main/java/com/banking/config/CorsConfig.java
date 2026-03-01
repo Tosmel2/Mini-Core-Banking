@@ -9,6 +9,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 public class CorsConfig {
@@ -29,14 +30,31 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
+        // Trim whitespace to avoid mismatches from env variables like "a.com, b.com"
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+        configuration.setAllowedOrigins(origins);
+
+        List<String> methods = Arrays.stream(allowedMethods.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+        configuration.setAllowedMethods(methods);
 
         if ("*".equals(allowedHeaders)) {
             configuration.addAllowedHeader("*");
         } else {
-            configuration.setAllowedHeaders(Arrays.asList(allowedHeaders.split(",")));
+            List<String> headers = Arrays.stream(allowedHeaders.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+            configuration.setAllowedHeaders(headers);
         }
+
+        // Commonly useful exposed headers (safe to include)
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Location", "Content-Disposition"));
 
         configuration.setAllowCredentials(allowCredentials);
         configuration.setMaxAge(3600L);
