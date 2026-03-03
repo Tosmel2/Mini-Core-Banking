@@ -4,6 +4,7 @@ import com.banking.dto.*;
 import com.banking.entity.Role;
 import com.banking.entity.User;
 import com.banking.exception.DuplicateResourceException;
+import com.banking.exception.ResourceNotFoundException;
 import com.banking.repository.RoleRepository;
 import com.banking.repository.UserRepository;
 import com.banking.security.JwtUtil;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -120,4 +122,39 @@ public class AuthService {
                 .user(userDto)
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public UserDto getCurrentUser() {
+        // Get authenticated user's email from security context
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Fetch user from database
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        // Check if user is active
+        if (!user.getIsActive()) {
+            throw new RuntimeException("User account is inactive");
+        }
+
+        return mapToUserDto(user);
+    }
+
+    private UserDto mapToUserDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .dateOfBirth(user.getDateOfBirth())
+                .address(user.getAddress())
+                .isActive(user.getIsActive())
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+
 }

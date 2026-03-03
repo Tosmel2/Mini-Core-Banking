@@ -1,11 +1,9 @@
 package com.banking.controller;
 
-import com.banking.dto.LoginRequest;
-import com.banking.dto.LoginResponse;
-import com.banking.dto.RegisterRequest;
-import com.banking.dto.RegisterResponse;
+import com.banking.dto.*;
 import com.banking.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +36,12 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<UserDto> getCurrentUser() {
+        UserDto user = authService.getCurrentUser();
+        return ResponseEntity.ok(user);
     }
 }
