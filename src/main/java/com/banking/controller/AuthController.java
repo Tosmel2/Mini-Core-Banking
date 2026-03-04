@@ -40,6 +40,7 @@ public class AuthController {
 
     @GetMapping("/me")
     @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get current authenticated user information")
     public ResponseEntity<UserDto> getCurrentUser() {
         UserDto user = authService.getCurrentUser();
         return ResponseEntity.ok(user);
