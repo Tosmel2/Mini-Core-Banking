@@ -69,6 +69,10 @@ public class User {
     @Builder.Default
     private Set<Account> accounts = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_account_id")
+    private Account currentAccount;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Loan> loans = new HashSet<>();

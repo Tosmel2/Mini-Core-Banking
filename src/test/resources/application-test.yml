@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:banking_test_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: false
+  main:
+    allow-bean-definition-overriding: true
+
+# Override logging to keep test output concise
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    com.banking: INFO
+
+# JWT for tests
+jwt:
+  secret: test-secret-key-which-is-long-enough-to-be-256-bits-xxxxxxxxxxxxxxxxxxxxxxxx
+  expiration: 3600000

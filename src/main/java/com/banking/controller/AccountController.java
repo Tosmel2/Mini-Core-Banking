@@ -34,6 +34,37 @@ public class AccountController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{accountId}")
+    @Operation(summary = "Get details of a single account")
+    public ResponseEntity<AccountDto> getAccount(@PathVariable Long accountId) {
+        AccountDto response = accountService.getAccount(accountId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/current")
+    @Operation(summary = "Get current selected account for authenticated user")
+    public ResponseEntity<AccountDto> getCurrentAccount() {
+        AccountDto response = accountService.getCurrentAccount();
+        if (response == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/current")
+    @Operation(summary = "Set current selected account for authenticated user")
+    public ResponseEntity<Void> setCurrentAccount(@Valid @RequestBody SetCurrentAccountRequest request) {
+        accountService.setCurrentAccount(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/lookup/{accountNumber}")
+    @Operation(summary = "Lookup beneficiary details by account number for transfer confirmation")
+    public ResponseEntity<BeneficiaryLookupResponse> lookupBeneficiary(@PathVariable String accountNumber) {
+        BeneficiaryLookupResponse response = accountService.lookupBeneficiary(accountNumber);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{accountId}/balance")
     @Operation(summary = "Get account balance")
     public ResponseEntity<AccountBalanceResponse> getAccountBalance(@PathVariable Long accountId) {

@@ -103,6 +103,76 @@ public class AccountService {
         return account;
     }
 
+    // ===== Newly added methods =====
+
+    @Transactional(readOnly = true)
+    public AccountDto getAccount(Long accountId) {
+        Account account = getAccountAndValidateOwnership(accountId);
+        return mapToDto(account);
+    }
+
+    @Transactional(readOnly = true)
+    public AccountDto getCurrentAccount() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Account current = user.getCurrentAccount();
+        if (current == null) {
+            return null;
+        }
+        if (!current.getUser().getId().equals(user.getId())) {
+            return null;
+        }
+        return mapToDto(current);
+    }
+
+    @Transactional
+    public void setCurrentAccount(SetCurrentAccountRequest request) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Account account = getAccountAndValidateOwnership(request.getAccountId());
+        if (account.getStatus() != Account.AccountStatus.ACTIVE) {
+            throw new UnauthorizedException("Cannot select a non-active account as current");
+        }
+        user.setCurrentAccount(account);
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public BeneficiaryLookupResponse lookupBeneficiary(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Destination account not found"));
+        if (account.getStatus() != Account.AccountStatus.ACTIVE) {
+            throw new ResourceNotFoundException("Destination account not found");
+        }
+        User holder = account.getUser();
+        String display = buildHolderDisplayName(holder);
+        return BeneficiaryLookupResponse.builder()
+                .accountNumber(account.getAccountNumber())
+                .accountType(account.getAccountType())
+                .currency(account.getCurrency())
+                .status(account.getStatus())
+                .holderDisplayName(display)
+                .build();
+    }
+
+    private String buildHolderDisplayName(User user) {
+        String first = user.getFirstName();
+        String last = user.getLastName();
+        if (first == null && last == null) {
+            return "Account Holder";
+        }
+        if (first == null) {
+            return last;
+        }
+        if (last == null || last.isBlank()) {
+            return first;
+        }
+        return first + " " + last.charAt(0) + ".";
+    }
+
     private AccountDto mapToDto(Account account) {
         return AccountDto.builder()
                 .id(account.getId())
